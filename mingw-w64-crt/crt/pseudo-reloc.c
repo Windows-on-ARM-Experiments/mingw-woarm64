@@ -53,12 +53,12 @@ extern IMAGE_DOS_HEADER __ImageBase;
 void _pei386_runtime_relocator (void);
 
 /* v1 relocation is basically:
- *   *(base + .target) += .addend
+ *   *(base + .target) += .reldata
  * where (base + .target) is always assumed to point
  * to a DWORD (4 bytes).
  */
 typedef struct {
-  DWORD addend;
+  DWORD reldata;
   DWORD target;
 } runtime_pseudo_reloc_item_v1;
 
@@ -313,6 +313,9 @@ do_pseudo_reloc (void * start, void * end, void * base)
   runtime_pseudo_reloc_v2 *v2_hdr = (runtime_pseudo_reloc_v2 *) start;
   runtime_pseudo_reloc_item_v2 *r;
   unsigned int bits;
+#ifdef __aarch64__
+  uint32_t opcode;
+#endif   
 
   /* A valid relocation list will contain at least one entry, and
    * one v1 data structure (the smallest one) requires two DWORDs.
@@ -334,7 +337,7 @@ do_pseudo_reloc (void * start, void * end, void * base)
    *      first element in the list IS an actual v1 relocation
    *      record, which is two DWORDs.  Because there will never
    *      be a case where a v1 relocation record has both
-   *      addend == 0 and target == 0, this case will not be
+   *      reldata == 0 and target == 0, this case will not be
    *      confused with the prior one.
    * All current binutils, when generating a v1 relocation list,
    * use the second (e.g. original) form -- that is, without the
@@ -347,7 +350,7 @@ do_pseudo_reloc (void * start, void * end, void * base)
       /* We have a list header item indicating that the rest
        * of the list contains v1 entries.  Move the pointer to
        * the first true v1 relocation record.  By definition,
-       * that v1 element will not have both addend == 0 and
+       * that v1 element will not have both reldata == 0 and
        * target == 0 (and thus, when interpreted as a
        * runtime_pseudo_reloc_v2, it will not have both
        * magic1 == 0 and magic2 == 0).
@@ -367,7 +370,7 @@ do_pseudo_reloc (void * start, void * end, void * base)
 	{
 	  DWORD newval;
 	  reloc_target = (ptrdiff_t) base + o->target;
-	  newval = (*((DWORD*) reloc_target)) + o->addend;
+	  newval = (*((DWORD*) reloc_target)) + o->reldata;
 	  __write_memory ((void *) reloc_target, &newval, sizeof(DWORD));
 	}
       return;
@@ -419,6 +422,27 @@ do_pseudo_reloc (void * start, void * end, void * base)
 	    if ((reldata & 0x8000) != 0)
 	      reldata |= ~((ptrdiff_t) 0xffff);
 	    break;
+#ifdef __aarch64__
+	  case 12:
+	    opcode = (*((unsigned int *)reloc_target));
+	    reldata = (ptrdiff_t)((opcode & 0x3ffc00) >> 10);
+	    break;
+	  case 21:
+	    opcode = (*((unsigned int *)reloc_target));
+	    reldata = (ptrdiff_t)(((opcode & 0xffffe0) >> 3)
+		     | ((opcode & 0x60000000) >> 29));
+	    if (reldata & 0x100000)
+	      reldata |= ~((ptrdiff_t) 0xfffff);
+            reldata <<= 12;
+	    break;
+	  case 26:
+	    opcode = (*((unsigned int *)reloc_target));
+	    reldata = (ptrdiff_t)(opcode & 0x3ffffff) << 2;
+	    if (reldata & 0x8000000)
+	      reldata |= 0xfffffffff0000000ull;
+            reldata <<= 12;
+	    break;
+#endif
 	  case 32:
 	    reldata = (ptrdiff_t) (*((unsigned int *)reloc_target));
 #ifdef _WIN64
@@ -439,10 +463,20 @@ do_pseudo_reloc (void * start, void * end, void * base)
         }
 
       /* Adjust the relocation value */
-      reldata -= ((ptrdiff_t) base + r->sym);
+      reldata -= (ptrdiff_t) base + (ptrdiff_t)r->sym;
       reldata += addr_imp;
 
       bits = r->flags & 0xff;
+
+#ifdef __aarch64__
+      if (bits == 26 ||
+          bits == 21 ||
+          bits == 12)
+         {
+            bits = 64;
+         }
+#endif
+
       if (bits < sizeof(ptrdiff_t)*8)
         {
           /* Check for overflows. We don't know if the target address is
@@ -453,10 +487,13 @@ do_pseudo_reloc (void * start, void * end, void * base)
            * this won't catch offsets that are only barely too large. */
           ptrdiff_t max_unsigned = (1LL << bits) - 1;
           ptrdiff_t min_signed = UINTPTR_MAX << (bits - 1);
+
           if (reldata > max_unsigned || reldata < min_signed)
+          {
 	    __report_error ("%d bit pseudo relocation at %p out of range, "
                             "targeting %p, yielding the value %p.\n",
                             bits, reloc_target, addr_imp, reldata);
+          }
         }
 
       /* Write the new relocation value back to *reloc_target */
@@ -468,6 +505,26 @@ do_pseudo_reloc (void * start, void * end, void * base)
 	 case 16:
            __write_memory ((void *) reloc_target, &reldata, 2);
 	   break;
+#ifdef __aarch64__
+	 case 12:
+           reldata = reldata & 0xfff;
+           opcode &= 0xffc003ff;
+           opcode |= reldata << 10;
+           __write_memory ((void *) reloc_target, &opcode, 4);
+	   break;
+	 case 21:
+	   opcode &= 0x9f00001f;
+           reldata >>= 12;
+	   opcode |= (reldata & 0x3) << 29;
+	   opcode |= (reldata & 0x1ffffc) << 3;
+           __write_memory ((void *) reloc_target, &opcode, 4);
+	   break;
+	 case 26:
+	   opcode &= 0xfc000000;
+	   opcode |= (reldata >> 2) & 0x3ffffff;
+           __write_memory ((void *) reloc_target, &opcode, 4);
+	   break;
+#endif
 	 case 32:
            __write_memory ((void *) reloc_target, &reldata, 4);
 	   break;
