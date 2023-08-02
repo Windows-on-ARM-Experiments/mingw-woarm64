@@ -1051,9 +1051,24 @@ typedef union
 static __pformat_fpreg_t init_fpreg_ldouble( long double val )
 {
   __pformat_fpreg_t x;
-  x.__pformat_fpreg_ldouble_t = val;
+  
+  int bit_count = sizeof( long double ) * 8;  
 
-  if( sizeof( double ) == sizeof( long double ) )
+    if( bit_count == 64 || bit_count == 80)
+    {
+      x.__pformat_fpreg_ldouble_t = val;
+    }
+    else
+    {
+      /* Turns out that only 64 bit or 80 bit doubles are currently supported. 
+      * aarch64 supports 128 bit doubles and that seems to be broken 
+      * in gdtoa. Just use a 64bit double as a work around.
+      */
+      x.__pformat_fpreg_double_t = (double)val;
+      bit_count = 64;
+    }
+
+  if( bit_count == 64 )
   {
     /* Here, __pformat_fpreg_t expects to be initialized with a 80 bit long
      * double, but this platform doesn't have long doubles that differ from
