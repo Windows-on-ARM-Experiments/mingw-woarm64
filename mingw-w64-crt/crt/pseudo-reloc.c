@@ -527,7 +527,9 @@ do_pseudo_reloc (void * start, void * end, void * base)
         }
 
       putx("bits", (int) (r->flags & 0xff));
+#ifdef __aarch64__
       putx("opcode", opcode);
+#endif
       putx("reldata", reldata);
       putx("base", base);
       putx("r->sym", r->sym);
