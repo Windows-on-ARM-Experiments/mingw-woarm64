@@ -46,69 +46,6 @@
 #define __MINGW_LSYMBOL(sym) sym
 #endif
 
-static void putn(const char *label, int nn)
-{
-  char sz[32];
-  char *p = sz;
-  int neg = nn < 0;
-
-  while(nn)
-  {
-    *p = '0' + abs(nn % 10);
-    p += 1;
-    nn /= 10;
-  }
-
-  *p = 0;
- 
-  int len = strlen(sz);
-
-  for(int i=0; i<len/2; i++)
-  {
-    char temp=sz[i];
-    sz[i]=sz[len-i-1];
-    sz[len-i-1]=temp;
-  }
-
-  fputs (label, stderr);
-  fputs (": ", stderr);
-  if (neg) fputs ("-", stderr);
-  fputs (sz, stderr);
-  fputs ("\n", stderr);
-}
-
-static void putx(const char *label, ptrdiff_t nn)
-{
-  const char text[] = "0123456789ABCDEF";
-  char sz[32];
-  char *p = sz;
-  int neg = nn < 0;
-
-  while(nn)
-  {
-    *p = text[abs(nn % 16)];
-    p += 1;
-    nn /= 16;
-  }
-
-  *p = 0;
- 
-  int len = strlen(sz);
-
-  for(int i=0; i<len/2; i++)
-  {
-    char temp=sz[i];
-    sz[i]=sz[len-i-1];
-    sz[len-i-1]=temp;
-  }
-
-  fputs (label, stderr);
-  fputs (": ", stderr);
-  if (neg) fputs ("-", stderr);
-  fputs (sz, stderr);
-  fputs ("\n", stderr);
-}
-
 extern char __RUNTIME_PSEUDO_RELOC_LIST__;
 extern char __RUNTIME_PSEUDO_RELOC_LIST_END__;
 extern IMAGE_DOS_HEADER __ImageBase;
@@ -526,21 +463,9 @@ do_pseudo_reloc (void * start, void * end, void * base)
 	    break;
         }
 
-      putx("bits", (int) (r->flags & 0xff));
-#ifdef __aarch64__
-      putx("opcode", opcode);
-#endif
-      putx("reldata", reldata);
-      putx("base", base);
-      putx("r->sym", r->sym);
-      putx("addr_imp", addr_imp);
-      putx("base + r->sym", (ptrdiff_t) base + (ptrdiff_t)r->sym);
-
       /* Adjust the relocation value */
       reldata -= (ptrdiff_t) base + (ptrdiff_t)r->sym;
-      putx("sub base reldata", reldata);
       reldata += addr_imp;
-      putx("add addr imp reldata", reldata);
 
       bits = r->flags & 0xff;
 
