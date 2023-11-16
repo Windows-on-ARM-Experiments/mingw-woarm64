@@ -2120,7 +2120,7 @@ libarm64_LIBRARIES += libarm64/libmingwthrd.a
 libarm64_libmingwthrd_a_SOURCES = $(src_libmingwthrd)
 libarm64_libmingwthrd_a_CPPFLAGS=$(CPPFLAGSARM64) $(sysincludes)
 
-processed_defs += libarm64/msvcrt.def libarm64/ucrtbase.def \
+processed_defs += libarm64/msvcrt.def libarm64/msvcr80.def libarm64/msvcr90.def libarm64/msvcr90d.def libarm64/msvcr100.def libarm64/msvcr110.def libarm64/msvcr120_app.def libarm64/ucrtbase.def \
 				  libarm64/advapi32.def libarm64/clbcatq.def libarm64/kernel32.def libarm64/ole32.def libarm64/oleaut32.def \
 				  libarm64/user32.def libarm64/ws2_32.def \
 				  libarm64/api-ms-win-crt-math-l1-1-0.def libarm64/api-ms-win-crt-private-l1-1-0.def libarm64/api-ms-win-crt-runtime-l1-1-0.def \
@@ -2131,6 +2131,16 @@ endif
 include libarm64/Makefile.am
 
 if !W32API
+libarm64_DATA += libarm64/libmsvcp60.a
+
+libarm64_DATA += libarm64/libmsvcr110.a
+libarm64/libmsvcr110.a: lib-common/msvcr110.mri libarm64/libmsvcr110_def.a libarm64/libmsvcrt_common.a
+	cd $(dir $@) && $(AR) -M < $(abspath $<)
+
+libarm64_DATA += libarm64/libmsvcr120_app.a
+libarm64/libmsvcr120_app.a: lib-common/msvcr120_app.mri libarm64/libmsvcr120_app_def.a libarm64/libmsvcrt_common.a libarm64/libmsvcr120_app_extra.a
+	cd $(dir $@) && $(AR) -M < $(abspath $<)
+
 libarm64_DATA += libarm64/libucrtbase.a
 libarm64/libucrtbase.a: lib-common/ucrtbase.mri libarm64/libucrtbase_def.a libarm64/libucrt_extra.a
 	cd $(dir $@) && $(AR) -M < $(abspath $<)

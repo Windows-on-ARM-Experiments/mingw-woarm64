@@ -1064,6 +1064,7 @@ _dup2
 _ecvt
 _ecvt_s
 F_X86_ANY(_environ DATA)
+F_ARM64(_environ DATA)
 F_ARM32(_endthread)
 F_ARM32(_endthreadex)
 _eof
