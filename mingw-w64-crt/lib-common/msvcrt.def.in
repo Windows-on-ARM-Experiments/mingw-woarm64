@@ -473,6 +473,7 @@ _ecvt_s
 _endthread
 _endthreadex
 F_X86_ANY(_environ DATA)
+F_ARM64(_environ DATA)
 _eof
 _errno
 F_I386(_except_handler2)
