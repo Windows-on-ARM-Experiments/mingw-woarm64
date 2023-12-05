@@ -1335,14 +1335,14 @@ __mingw_sformat (_IFP *s, const char *format, va_list argp)
 	  if ((flags & IS_LL) != 0)
 	    {
 	      long double ld;
-	      ld = __mingw_strtold (wbuf, &tmp_wbuf_ptr/*, flags & USE_GROUP*/);
+	      ld = strtold (wbuf, &tmp_wbuf_ptr/*, flags & USE_GROUP*/);
 	      if ((flags & IS_SUPPRESSED) == 0 && tmp_wbuf_ptr != wbuf)
 	        *(npos != 0 ? (long double *) get_va_nth (argp, npos) : va_arg (arg, long double *)) = is_neg ? -ld : ld;
 	    }
 	  else if ((flags & IS_L) != 0)
 	    {
 	      double d;
-	      d = (double) __mingw_strtold (wbuf, &tmp_wbuf_ptr/*, flags & USE_GROUP*/);
+	      d = (double) strtold (wbuf, &tmp_wbuf_ptr/*, flags & USE_GROUP*/);
 	      if ((flags & IS_SUPPRESSED) == 0 && tmp_wbuf_ptr != wbuf)
 		*(npos != 0 ? (double *) get_va_nth (argp, npos) : va_arg (arg, double *)) = is_neg ? -d : d;
 	    }
