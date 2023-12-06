@@ -91,6 +91,8 @@ __mingw_strtod (const char * __restrict__ src, char ** __restrict__ endptr)
  * long double functions as aliases to __strtod. */
 
 long double __cdecl
-__mingw_strtold (const char * __restrict__ src, char ** __restrict__ endptr)
-  __attribute__((alias("__strtod")));
+__mingw_strtold (const char * __restrict__ src, char ** __restrict__ endptr) 
+{
+	return __strtod(src, endptr);
+}
 #endif
