@@ -1047,9 +1047,20 @@ typedef union
 static __pformat_fpreg_t init_fpreg_ldouble( long double val )
 {
   __pformat_fpreg_t x;
-  x.__pformat_fpreg_ldouble_t = val;
 
-  if( sizeof( double ) == sizeof( long double ) )
+#if defined(__GNUC__) && defined(__aarch64__) && __SIZEOF_LONG_DOUBLE__ == 16
+  /* Only 64 bit or 80 bit doubles are currently supported by aarch64-w64-mingw32-gcc.
+   * AArch64 supports 128 bit doubles and that seems to be broken
+   * in gdtoa. Use a 64bit double as a work around.
+   */
+  const int double_is_long_double = 1;
+  x.__pformat_fpreg_double_t = (double)val;
+#else
+  const int double_is_long_double = sizeof( double ) == sizeof( long double );
+  x.__pformat_fpreg_ldouble_t = val;
+#endif
+
+  if( double_is_long_double )
   {
     /* Here, __pformat_fpreg_t expects to be initialized with a 80 bit long
      * double, but this platform doesn't have long doubles that differ from
