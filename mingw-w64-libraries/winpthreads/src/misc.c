@@ -39,7 +39,7 @@ HRESULT (WINAPI *_pthread_set_thread_description) (HANDLE, PCWSTR) = NULL;
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wprio-ctor-dtor"
-__attribute__((constructor(0)))
+__attribute__((constructor()))
 #endif
 static void winpthreads_init(void)
 {
