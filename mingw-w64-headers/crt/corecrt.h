@@ -41,10 +41,10 @@ typedef unsigned int size_t;
 #ifndef _SSIZE_T_DEFINED
 #define _SSIZE_T_DEFINED
 #undef ssize_t
-#ifdef _WIN64
+#if defined(_WIN64) && !defined(__aarch64__)
 __MINGW_EXTENSION typedef __int64 ssize_t;
 #else
-typedef int ssize_t;
+typedef long int ssize_t;
 #endif /* _WIN64 */
 #endif /* _SSIZE_T_DEFINED */
 
