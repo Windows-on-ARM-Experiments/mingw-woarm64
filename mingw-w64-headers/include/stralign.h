@@ -152,7 +152,11 @@ extern "C" {
 #ifndef __CRT__NO_INLINE
   __CRT_INLINE int ua_wcsicmp(LPCUWSTR String1,LPCUWSTR String2) {
     if(WSTR_ALIGNED(String1) && WSTR_ALIGNED(String2))
+#if defined(__aarch64__)
+      return uaw_wcsicmp((LPCWSTR)String1,(LPCWSTR)String2);
+#else
       return _wcsicmp((LPCWSTR)String1,(LPCWSTR)String2);
+#endif
     return uaw_wcsicmp(String1,String2);
   }
 #endif /* !__CRT__NO_INLINE */
