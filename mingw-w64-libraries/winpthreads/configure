@@ -657,6 +657,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+HAVE_LIBGCC_FALSE
+HAVE_LIBGCC_TRUE
 COPY_STATIC_FALSE
 COPY_STATIC_TRUE
 COPY_SHARED_FALSE
@@ -13843,6 +13845,65 @@ fi
 # FIXME: Replace `main' with a function in `-lpthread':
 #AC_CHECK_LIB([pthread], [main])
 
+# Check if libgcc is available
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lgcc" >&5
+printf %s "checking for main in -lgcc... " >&6; }
+if test ${ac_cv_lib_gcc_main+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgcc  $LIBS"
+if test x$ac_no_link = xyes; then
+  as_fn_error $? "link tests are not allowed after AC_NO_EXECUTABLES" "$LINENO" 5
+fi
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main (void)
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_gcc_main=yes
+else $as_nop
+  ac_cv_lib_gcc_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gcc_main" >&5
+printf "%s\n" "$ac_cv_lib_gcc_main" >&6; }
+if test "x$ac_cv_lib_gcc_main" = xyes
+then :
+   if true ; then
+  HAVE_LIBGCC_TRUE=
+  HAVE_LIBGCC_FALSE='#'
+else
+  HAVE_LIBGCC_TRUE='#'
+  HAVE_LIBGCC_FALSE=
+fi
+
+else $as_nop
+   if false ; then
+  HAVE_LIBGCC_TRUE=
+  HAVE_LIBGCC_FALSE='#'
+else
+  HAVE_LIBGCC_TRUE='#'
+  HAVE_LIBGCC_FALSE=
+fi
+
+
+fi
+
+
 # Checks for header files.
 ac_fn_c_check_header_compile "$LINENO" "limits.h" "ac_cv_header_limits_h" "$ac_includes_default"
 if test "x$ac_cv_header_limits_h" = xyes
@@ -14075,6 +14136,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COPY_STATIC_TRUE}" && test -z "${COPY_STATIC_FALSE}"; then
   as_fn_error $? "conditional \"COPY_STATIC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_LIBGCC_TRUE}" && test -z "${HAVE_LIBGCC_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_LIBGCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_LIBGCC_TRUE}" && test -z "${HAVE_LIBGCC_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_LIBGCC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

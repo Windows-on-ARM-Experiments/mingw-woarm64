@@ -19,7 +19,9 @@ AM_CFLAGS += -nologo
 libwinpthread_la_CPPFLAGS += -D_CRT_NONSTDC_NO_WARNINGS
 else
 libwinpthread_la_CPPFLAGS += -D__USE_MINGW_ANSI_STDIO=0
-libwinpthread_la_LDFLAGS += -L$(builddir)/fakelib -Wc,-no-pthread
+if !HAVE_LIBGCC
+libwinpthread_la_LDFLAGS += -L$(builddir)/fakelib
+
 EXTRA_libwinpthread_la_DEPENDENCIES = fakelib/libgcc.a  fakelib/libgcc_eh.a  fakelib/libgcc_s.a
 
 # Break circular dep on bootstrap
@@ -27,6 +29,8 @@ noinst_LIBRARIES = fakelib/libgcc.a  fakelib/libgcc_eh.a  fakelib/libgcc_s.a
 fakelib_libgcc_a_SOURCES = src/libgcc/dll_dependency.S src/libgcc/dll_math.c
 fakelib_libgcc_s_a_SOURCES =
 fakelib_libgcc_eh_a_SOURCES =
+endif
+libwinpthread_la_LDFLAGS += -Wc,-no-pthread
 endif
 
 lib_LIBRARIES = 

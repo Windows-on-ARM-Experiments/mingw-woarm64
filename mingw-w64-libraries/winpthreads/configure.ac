@@ -45,6 +45,13 @@ AM_CONDITIONAL( [COPY_STATIC], [AS_VAR_TEST_SET([copy_static])] )
 # FIXME: Replace `main' with a function in `-lpthread':
 #AC_CHECK_LIB([pthread], [main])
 
+# Check if libgcc is available
+AC_CHECK_LIB(
+  [gcc], [main],
+  [AM_CONDITIONAL( [HAVE_LIBGCC], [true] )],
+  [AM_CONDITIONAL( [HAVE_LIBGCC], [false] )]
+)
+
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h sys/timeb.h])
 
