@@ -18,6 +18,7 @@ if MSVC
 AM_CFLAGS += -nologo
 libwinpthread_la_CPPFLAGS += -D_CRT_NONSTDC_NO_WARNINGS
 else
+libwinpthread_la_CFLAGS = @HOST_CFLAGS@
 libwinpthread_la_CPPFLAGS += -D__USE_MINGW_ANSI_STDIO=0
 libwinpthread_la_LDFLAGS += -L$(builddir)/fakelib -Wc,-no-pthread
 EXTRA_libwinpthread_la_DEPENDENCIES = fakelib/libgcc.a  fakelib/libgcc_eh.a  fakelib/libgcc_s.a

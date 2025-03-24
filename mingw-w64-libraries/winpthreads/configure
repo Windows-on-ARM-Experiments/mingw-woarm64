@@ -688,6 +688,7 @@ AS
 MSVC_FALSE
 MSVC_TRUE
 RCFLAGS
+HOST_CFLAGS
 ac_ct_AR
 AR
 am__fastdepCCAS_FALSE
@@ -5023,6 +5024,13 @@ lib)
   ;;
 unknown)
   as_fn_error $? "could not determine $AR interface" "$LINENO" 5
+  ;;
+esac
+
+
+case $host in
+  aarch64-*)
+    HOST_CFLAGS="-mno-outline-atomics"
   ;;
 esac
 
