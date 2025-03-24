@@ -19,6 +19,13 @@ AC_PROG_CC
 AM_PROG_AS
 AM_PROG_AR
 
+case $host in
+  aarch64-*)
+    HOST_CFLAGS="-mno-outline-atomics"
+  ;;
+esac
+AC_SUBST([HOST_CFLAGS])
+
 AS_CASE([$CC],
   [*cl|*cl.exe],
     [RC="$am_aux_dir/windres-rc rc.exe"
