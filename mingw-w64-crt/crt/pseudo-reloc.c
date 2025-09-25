@@ -503,23 +503,28 @@ do_pseudo_reloc (void * start, void * end, void * base)
 	   break;
 #ifdef __aarch64__
 	 case 12:
-           reldata = reldata & 0xfff;
-           opcode &= 0xffc003ff;
-           opcode |= reldata << 10;
+	   /* Replace add Xn, Xn, :lo12:label with ldr Xn, [Xn, :lo12:__imp__func].
+	      That loads the address of _func into Xn.  */
+	   opcode = 0xf9400000 | (opcode & 0x3ff); // ldr
+	   reldata = ((ptrdiff_t) base + r->sym) & ((1 << 12) - 1);
+	   reldata >>= 3;
+	   opcode |= reldata << 10;
            __write_memory ((void *) reloc_target, &opcode, 4);
 	   break;
 	 case 21:
+	   /* Replace adrp Xn, label with adrp Xn, __imp__func.  */
 	   opcode &= 0x9f00001f;
-           reldata >>= 12;
-	   opcode |= (reldata & 0x3) << 29;
-	   opcode |= (reldata & 0x1ffffc) << 3;
+	   reldata = (((ptrdiff_t) base + r->sym) >> 12)
+		     - (((ptrdiff_t) base + r->target) >> 12);
+	   reldata &= (1 << 21) - 1;
+	   opcode |= (reldata & 3) << 29;
+	   reldata >>= 2;
+	   opcode |= reldata << 5;
            __write_memory ((void *) reloc_target, &opcode, 4);
 	   break;
-	 case 26:
-	   opcode &= 0xfc000000;
-	   opcode |= (reldata >> 2) & 0x3ffffff;
-           __write_memory ((void *) reloc_target, &opcode, 4);
-	   break;
+	 /* A note regarding 26 bits relocation.
+	    A single opcode is not sufficient for 26 bits relocation in dynamic linking.
+	    The linker generates a jump stub instead.  */
 #endif
 	 case 32:
            __write_memory ((void *) reloc_target, &reldata, 4);
