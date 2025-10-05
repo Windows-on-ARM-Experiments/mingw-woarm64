@@ -151,12 +151,17 @@ typedef __time64_t time_t;
 #endif
 #endif
 
+/* A temporary workaround.
+   uintptr_t is not defined on *-*-cygwin targets.
+   The issue should be investigated and properly resolved.  */
+#if !defined (__CYGWIN__)
 #ifdef _DEBUG
 _CRTIMP void __cdecl _invalid_parameter(const wchar_t *expression, const wchar_t *function_name, const wchar_t *file_name, unsigned int line_number, uintptr_t reserved);
 #endif
 _CRTIMP void __cdecl _invalid_parameter_noinfo(void);
 _CRTIMP __MINGW_ATTRIB_NORETURN void __cdecl _invalid_parameter_noinfo_noreturn(void);
 _CRTIMP __MINGW_ATTRIB_NORETURN void __cdecl _invoke_watson(const wchar_t *expression, const wchar_t *function_name, const wchar_t *file_name, unsigned int line_number, uintptr_t reserved);
+#endif
 
 #if defined(__cplusplus) && _CRT_SECURE_CPP_OVERLOAD_SECURE_NAMES
 
